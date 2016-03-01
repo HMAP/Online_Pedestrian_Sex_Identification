@@ -50,7 +50,7 @@ class Descriptor:
                 histogram = np.histogram(thetas,bins=bins,weights=weights)[0]
                 #print weightSum
                 histogram = histogram/weightSum
-                print histogram
+                #print histogram
                 des.append(histogram)
         des =np.array(des)
         return des
