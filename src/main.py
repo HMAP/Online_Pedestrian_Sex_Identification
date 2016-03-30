@@ -11,24 +11,43 @@ from sklearn.decomposition import RandomizedPCA
 from sklearn.svm import LinearSVC
 from datetime import datetime
 import sys
+import cv2
+from array import array
+
 class Data:
     def __init__(self):
         self.load()
 
     def load(self):
+
+        face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_alt.xml')
         self.males = []
         for male in listdir('data/faces94/male'):
             for file in listdir('data/faces94/male/'+male)[:int(sys.argv[1])]:
-                im = Image.open('data/faces94/male/'+male+'/'+file,'r')
-                im = im.convert('L')
-                self.males.append(np.asarray(im))
+                gray = cv2.imread('data/faces94/male/'+male+'/'+file,0)
+                try:
+                    (x,y,w,h) = face_cascade.detectMultiScale(gray, 1.3, 5)[0]
+                    face = gray[y:y+h, x:x+w]
+                    dim=cv2.resize(face, (100, 100), interpolation = cv2.INTER_AREA)
+                    self.males.append(np.array(dim))
+                    cv2.imwrite('data/cropped/male/'+male+'.jpg', dim)
+                except:
+                    pass
+                    # print 'male',file
 
         self.females = []
         for female in listdir('data/faces94/female'):
             for file in listdir('data/faces94/female/'+female)[:int(sys.argv[1])]:
-                im = Image.open('data/faces94/female/'+female+'/'+file,'r')
-                im= im.convert('L')
-                self.females.append(np.asarray(im))
+                gray = cv2.imread('data/faces94/female/'+female+'/'+file,0)
+                try:
+                    (x,y,w,h) = face_cascade.detectMultiScale(gray, 1.3, 5)[0]
+                    face = gray[y:y+h, x:x+w]
+                    dim=cv2.resize(face, (100, 100), interpolation = cv2.INTER_AREA)
+                    self.females.append(np.array(dim))
+                    cv2.imwrite('data/cropped/female/'+female+'.jpg', dim)
+                except:
+                    pass
+                    # print 'female',file
 
 def plot_gallery(images, titles, h, w, n_row=3, n_col=4):
     """Helper function to plot a gallery of portraits"""
@@ -41,6 +60,7 @@ def plot_gallery(images, titles, h, w, n_row=3, n_col=4):
         plt.xticks(())
         plt.yticks(())
     plt.show()
+
 class eF:
     def __init__(self,Data):
         self.load(Data)
@@ -59,15 +79,15 @@ class eF:
 
         n_components = 15
 
-        pca = RandomizedPCA(n_components=n_components, whiten=True).fit(X_train)
-        X_train_pca = pca.transform(X_train)
-        X_test_pca = pca.transform(X_test)
-        eigenfaces = pca.components_.reshape((n_components, h, w))
+        self.pca = RandomizedPCA(n_components=n_components, whiten=True).fit(X_train)
+        X_train_pca = self.pca.transform(X_train)
+        X_test_pca = self.pca.transform(X_test)
+        eigenfaces = self.pca.components_.reshape((n_components, h, w))
         eigenface_titles = ["eigenface %d" % i for i in range(eigenfaces.shape[0])]
         #plot_gallery(eigenfaces, eigenface_titles, h, w)
-        clf = LinearSVC()
-        clf.fit(X_train_pca,y_train)
-        s=clf.score(X_test_pca,y_test)
+        self.clf = LinearSVC()
+        self.clf.fit(X_train_pca,y_train)
+        s=self.clf.score(X_test_pca,y_test)
         print s
 
 a=Data()
