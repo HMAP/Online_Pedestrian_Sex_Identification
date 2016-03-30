@@ -118,13 +118,13 @@ class video:
                     prediction = model.clf.predict([transform])[0]
                     # print prediction
                     if prediction == 'male':
-                        colo = (255)
+                        colo = (255,0,0)
                         print 'male'
                     else:
-                        colo = (0)
+                        colo = (0,0,255)
                         print "female"
-                    cv2.rectangle(gray,(x,y),(x+w,y+h),colo,2)
-                cv2.imshow('video', gray)
+                    cv2.rectangle(frame,(x,y),(x+w,y+h),colo,2)
+                cv2.imshow('video', frame)
                 pos_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
                 print str(pos_frame)+" frames"
             else:
