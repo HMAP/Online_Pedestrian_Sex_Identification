@@ -9,22 +9,23 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.decomposition import RandomizedPCA
 from sklearn.svm import LinearSVC
-
+from datetime import datetime
+import sys
 class Data:
     def __init__(self):
         self.load()
 
     def load(self):
         self.males = []
-        for male in listdir('data/faces94/malestaff'):
-            for file in listdir('data/faces94/malestaff/'+male):
-                im = Image.open('data/faces94/malestaff/'+male+'/'+file,'r')
+        for male in listdir('data/faces94/male'):
+            for file in listdir('data/faces94/male/'+male)[:int(sys.argv[1])]:
+                im = Image.open('data/faces94/male/'+male+'/'+file,'r')
                 im = im.convert('L')
                 self.males.append(np.asarray(im))
 
         self.females = []
         for female in listdir('data/faces94/female'):
-            for file in listdir('data/faces94/female/'+female):
+            for file in listdir('data/faces94/female/'+female)[:int(sys.argv[1])]:
                 im = Image.open('data/faces94/female/'+female+'/'+file,'r')
                 im= im.convert('L')
                 self.females.append(np.asarray(im))
@@ -54,7 +55,7 @@ class eF:
             data_set.append(person.flatten())
             data_set_labels.append(-1)
         h,w=person.shape
-        X_train, X_test, y_train, y_test = train_test_split(data_set, data_set_labels, test_size=0.25, random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(data_set, data_set_labels, test_size=0.25, random_state=datetime.now().second)
 
         n_components = 15
 
