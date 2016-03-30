@@ -22,32 +22,32 @@ class Data:
 
         face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_alt.xml')
         self.males = []
-        for male in listdir('data/faces94/male'):
-            for file in listdir('data/faces94/male/'+male)[:int(sys.argv[1])]:
-                gray = cv2.imread('data/faces94/male/'+male+'/'+file,0)
+        for male in listdir('data/faces94/malestaff'):
+            for file in listdir('data/faces94/malestaff/'+male)[:int(sys.argv[1])]:
+                gray = cv2.imread('data/faces94/malestaff/'+male+'/'+file,0)
                 try:
-                    (x,y,w,h) = face_cascade.detectMultiScale(gray, 1.3, 5)[0]
+                    (x,y,w,h) = face_cascade.detectMultiScale(gray, 1.9, 5)[0]
                     face = gray[y:y+h, x:x+w]
-                    dim=cv2.resize(face, (100, 100), interpolation = cv2.INTER_AREA)
+                    dim=cv2.resize(face, (10,10), interpolation = cv2.INTER_AREA)
                     self.males.append(np.array(dim))
-                    cv2.imwrite('data/cropped/male/'+male+'.jpg', dim)
+                    cv2.imwrite('data/cropped/malestaff/'+male+'.jpg', dim)
                 except:
                     pass
-                    # print 'male',file
+                    print 'male',file
 
         self.females = []
         for female in listdir('data/faces94/female'):
             for file in listdir('data/faces94/female/'+female)[:int(sys.argv[1])]:
                 gray = cv2.imread('data/faces94/female/'+female+'/'+file,0)
                 try:
-                    (x,y,w,h) = face_cascade.detectMultiScale(gray, 1.3, 5)[0]
+                    (x,y,w,h) = face_cascade.detectMultiScale(gray, 1.9, 5)[0]
                     face = gray[y:y+h, x:x+w]
-                    dim=cv2.resize(face, (100, 100), interpolation = cv2.INTER_AREA)
+                    dim=cv2.resize(face, (10,10), interpolation = cv2.INTER_AREA)
                     self.females.append(np.array(dim))
                     cv2.imwrite('data/cropped/female/'+female+'.jpg', dim)
                 except:
                     pass
-                    # print 'female',file
+                    print 'female',file
 
 def plot_gallery(images, titles, h, w, n_row=3, n_col=4):
     """Helper function to plot a gallery of portraits"""
@@ -70,14 +70,14 @@ class eF:
         data_set_labels = []
         for person in Data.males:
             data_set.append(person.flatten())
-            data_set_labels.append(1)
+            data_set_labels.append('male')
         for person in Data.females:
             data_set.append(person.flatten())
-            data_set_labels.append(-1)
+            data_set_labels.append('female')
         h,w=person.shape
-        X_train, X_test, y_train, y_test = train_test_split(data_set, data_set_labels, test_size=0.25, random_state=datetime.now().second)
+        X_train, X_test, y_train, y_test = train_test_split(data_set, data_set_labels, test_size=0.1, random_state=datetime.now().second)
 
-        n_components = 15
+        n_components = 12
 
         self.pca = RandomizedPCA(n_components=n_components, whiten=True).fit(X_train)
         X_train_pca = self.pca.transform(X_train)
@@ -90,5 +90,54 @@ class eF:
         s=self.clf.score(X_test_pca,y_test)
         print s
 
+class video:
+    def __init__(self,model):
+        self.load(model)
+
+    def load(self,model):
+        cap = cv2.VideoCapture(0)
+        face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_alt.xml')
+        pos_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
+        while True:
+            flag, frame = cap.read()
+            if flag:
+                # The frame is ready and already captured
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                faces = face_cascade.detectMultiScale(gray, 1.1, 5)
+                for (x,y,w,h) in faces:
+                    face = gray[y:y+h, x:x+w]
+                    dim=cv2.resize(face, (10,10), interpolation = cv2.INTER_AREA)
+                    dim = np.array(dim)
+                    dim=dim.flatten()
+                    # print dim
+                    transform = model.pca.transform([dim])[0]
+                    # print transform.shape
+                    prediction = model.clf.predict([transform])[0]
+                    # print prediction
+                    if prediction == 'male':
+                        colo = (255,0,0)
+                        print 'male'
+                    else:
+                        colo = (0,0,255)
+                        print "female"
+                    cv2.rectangle(frame,(x,y),(x+w,y+h),colo,2)
+                cv2.imshow('video', frame)
+                pos_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
+                # print str(pos_frame)+" frames"
+            else:
+                # The next frame is not ready, so we try to read it again
+                cap.set(cv2.CAP_PROP_POS_FRAMES, pos_frame-1)
+                print "frame is not ready"
+                # It is better to wait for a while for the next frame to be ready
+                cv2.waitKey(1000)
+
+            if cv2.waitKey(10) == 27:
+                break
+            # if cap.get(cv2.CAP_PROP_POS_FRAMES) == cap.get(cv2.CAP_PROP_FRAME_COUNT):
+            #     # If the number of captured frames is equal to the total number of frames,
+            #     # we stop
+            #     break
+
 a=Data()
 b=eF(a)
+c=video(b)
