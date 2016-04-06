@@ -38,8 +38,8 @@ class video:
                 if flag:
                     gray = np.array(cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY),dtype=np.uint8)
                     (rects, weights) = hog.detectMultiScale(frame, winStride=(4, 4), padding=(8, 8), scale=1.05)
-                     for (x, y, w, h) in rects:
- +                        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+                    for (x, y, w, h) in rects:
+                        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
                     cv2.imshow('people',frame)
                     gray = np.array(cv2.GaussianBlur(gray,(3,3),0),dtype=np.uint8)
                     images = np.zeros(shape=gray.shape + (back,))
