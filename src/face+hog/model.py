@@ -7,7 +7,7 @@ class Model:
         data = []
         data_set = []
         data_set_labels = []
-        def GetInterest(imgname,name=1):
+        def GetInterest(imgname):
             img = imgname
             # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             img = np.float32(img)
@@ -31,7 +31,7 @@ class Model:
                 for j in range(img.shape[1]):
                     if (i/5==0):
                         if(j/5==0):
-                            intpoints.append([i,j])     
+                            intpoints.append([i,j])
 
             return Ix,Iy,Ix2,Iy2,np.array(intpoints)
 
@@ -43,10 +43,9 @@ class Model:
             points = []
             window=4
             vec = []
-            off = 0  
+            off = 0
+            # print Int
             for p in Int:
-                if p[0]<2*window-1 or p[0]>w -1- 2*window or p[1]<2*window-1 or p[1]>h -1- 2*window:
-                    continue 
                 ang = np.zeros(128)
                 points.append(p)
                 for i in range(0,4):
@@ -66,34 +65,35 @@ class Model:
                                 elif (lamb>=1.5 and lamb<1.75): off = 6
                                 elif (lamb>=1.75 and lamb<2): off = 7
                                 ang[block*8 + off] += H[indx][indy]
+                # print ang
                 vec.append(ang)
 
             return np.asarray(points),np.asarray(vec)
+
+        print len(Data.males)
+
         for person in Data.males:
-            # cv2.imshow('face',person)
-            # cv2.waitKey(0)
-            # print person 
-            # break
-            I1x,I1y,I1x2,I1y2,Int1 = GetInterest(person,1)
+            I1x,I1y,I1x2,I1y2,Int1 = GetInterest(person)
+            # print Int1
             Int1,vec1 = vectorise(I1x,I1y,I1x2,I1y2,Int1)
-            data.append([vec1,"male"])
+            data.append([vec1.flatten(),"male"])
+
         for person in Data.females:
-            I1x,I1y,I1x2,I1y2,Int1 = GetInterest(person,1)
+            I1x,I1y,I1x2,I1y2,Int1 = GetInterest(person)
             Int1,vec1 = vectorise(I1x,I1y,I1x2,I1y2,Int1)
-            data.append([vec1,"female"])
+            data.append([vec1.flatten(),"female"])
         random.seed(datetime.now().microsecond)
         random.shuffle(data)
-        for tuple in data:
-            data_set.append(tuple[0])
-            data_set_labels.append(tuple[1])
-        h,w=person.shape
-        X_train, X_test, y_train, y_test = train_test_split(data_set, data_set_labels, test_size=0.1, random_state=datetime.now().second)
-        # n_components = n
-        # self.pca = RandomizedPCA(n_components=n_components, whiten=True).fit(X_train)
-        # X_train_pca = self.pca.transform(X_train)
-        # X_test_pca = self.pca.transform(X_test)
+        for tup in data:
+            data_set.append(tup[0])
+            data_set_labels.append(tup[1])
+        X_train, X_test, y_train, y_test = train_test_split(data_set, data_set_labels, test_size=0.3, random_state=datetime.now().second)
+        n_components = n
+        self.pca = RandomizedPCA(n_components=n_components, whiten=True).fit(X_train)
+        X_train_pca = self.pca.transform(X_train)
+        X_test_pca = self.pca.transform(X_test)
         self.clf = LinearSVC()
-        self.clf.fit(X_train,y_train)
-        s=self.clf.score(X_test,y_test)
+        self.clf.fit(X_train_pca,y_train)
+        s=self.clf.score(X_test_pca,y_test)
         print "Train Score ",s
         print "Model succesfully Built."
