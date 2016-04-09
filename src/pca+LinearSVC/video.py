@@ -5,7 +5,7 @@ class video:
         self.load(model)
 
     def load(self,model):
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture('../1.mov')
         face_cascade = cv2.CascadeClassifier('assets/haarcascade_frontalface_alt.xml')
         pos_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
         count = 0
@@ -14,6 +14,7 @@ class video:
             if count != 24:
                 if flag:
                     # The frame is ready and already captured
+                    frame = cv2.resize(frame,(700,700), interpolation = cv2.INTER_AREA)
                     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                     faces = face_cascade.detectMultiScale(gray, 1.3, 5)
                     for (x,y,w,h) in faces:

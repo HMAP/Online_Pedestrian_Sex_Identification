@@ -1,13 +1,13 @@
 from dependency import *
 class Data:
-    def __init__(self, cut = 10):
+    def __init__(self, cut = 1):
         self.load(cut)
 
     def load(self,cut):
 
         face_cascade = cv2.CascadeClassifier('assets/haarcascade_frontalface_alt.xml')
         self.males = []
-        t='male'
+        t='malestaff'
         for male in listdir('data/faces94/'+t):
             for file in listdir('data/faces94/'+t+'/'+male)[:cut]:
                 gray = Image.open('data/faces94/'+t+'/'+male+'/'+file,'r')
