@@ -70,7 +70,7 @@ class Model:
 
             return np.asarray(points),np.asarray(vec)
 
-        print len(Data.males)
+        # print len(Data.males)
 
         for person in Data.males:
             I1x,I1y,I1x2,I1y2,Int1 = GetInterest(person)
@@ -88,12 +88,27 @@ class Model:
             data_set.append(tup[0])
             data_set_labels.append(tup[1])
         X_train, X_test, y_train, y_test = train_test_split(data_set, data_set_labels, test_size=0.3, random_state=datetime.now().second)
-        n_components = n
-        self.pca = RandomizedPCA(n_components=n_components, whiten=True).fit(X_train)
-        X_train_pca = self.pca.transform(X_train)
-        X_test_pca = self.pca.transform(X_test)
+        # n_components = n
+        # self.pca = RandomizedPCA(n_components=n_components, whiten=True).fit(X_train)
+        # X_train_pca = self.pca.transform(X_train)
+        # X_test_pca = self.pca.transform(X_test)
+        s=[]
         self.clf = LinearSVC()
-        self.clf.fit(X_train_pca,y_train)
-        s=self.clf.score(X_test_pca,y_test)
-        print "Train Score ",s
-        print "Model succesfully Built."
+        self.clf.fit(X_train,y_train)
+        s.append(self.clf.score(X_test,y_test))
+
+        self.clf = RandomForestClassifier()
+        self.clf.fit(X_train,y_train)
+        s.append(self.clf.score(X_test,y_test))
+
+        self.clf = Perceptron()
+        self.clf.fit(X_train,y_train)
+        s.append(self.clf.score(X_test,y_test))
+
+        self.clf = AdaBoostClassifier()
+        self.clf.fit(X_train,y_train)
+        s.append(self.clf.score(X_test,y_test))
+
+        print s
+        # print "Train Score ",s
+        # print "Model succesfully Built."

@@ -6,10 +6,12 @@ class video:
 
     def load(self,model):
         cap = cv2.VideoCapture('../1.mov')
+        length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        video = cv2.VideoWriter('video.mp4',cv2.VideoWriter_fourcc(*'X264'),30,(700,700))
         face_cascade = cv2.CascadeClassifier('assets/haarcascade_frontalface_alt.xml')
         pos_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
         count = 0
-        while True:
+        for foo in range(length):
             flag, frame = cap.read()
             if count != 24:
                 if flag:
@@ -34,7 +36,8 @@ class video:
                             colo = (0,0,255)
                             print "female"
                         cv2.rectangle(frame,(x,y),(x+w,y+h),colo,2)
-                    cv2.imshow('video', frame)
+                    video.write(frame)
+                    # cv2.imshow('video', frame)
                     # pos_frame = cap.get(cv2.CAP_PROP_POS_FRAMES)
                     # print str(pos_frame)+" frames"
                 else:
@@ -52,3 +55,5 @@ class video:
             #     # If the number of captured frames is equal to the total number of frames,
             #     # we stop
             #     break
+        cv2.destroyAllWindows()
+        video.release()

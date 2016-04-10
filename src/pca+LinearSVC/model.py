@@ -17,11 +17,13 @@ class Model:
             data_set.append(tuple[0])
             data_set_labels.append(tuple[1])
         h,w=person.shape
-        X_train, X_test, y_train, y_test = train_test_split(data_set, data_set_labels, test_size=0.25, random_state=datetime.now().second)
+        X_train, X_test, y_train, y_test = train_test_split(data_set, data_set_labels, test_size=0.1, random_state=datetime.now().second)
         n_components = n
         self.pca = RandomizedPCA(n_components=n_components, whiten=True).fit(X_train)
         X_train_pca = self.pca.transform(X_train)
         X_test_pca = self.pca.transform(X_test)
+        for i in range(len(X_train_pca)):
+            print X_train_pca[i], y_train[i]
         # eigenfaces = self.pca.components_.reshape((n_components, h, w))
         # eigenface_titles = ["eigenface %d" % i for i in range(eigenfaces.shape[0])]
         # self.plot_gallery(eigenfaces, eigenface_titles, h, w)

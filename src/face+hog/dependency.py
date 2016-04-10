@@ -15,6 +15,13 @@ import cv2
 from array import array
 import random
 
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.linear_model import Perceptron
+from sklearn.svm import LinearSVC
+
 from video import *
 from data import *
 from model import *
